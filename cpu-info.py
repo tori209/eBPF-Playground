@@ -60,5 +60,5 @@ try:
     sleep(1)
 except KeyboardInterrupt:
     print("Exiting...")
-except Expection as e:
+except Exception as e:
     print("Error:", e)
