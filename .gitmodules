@@ -1,0 +1,12 @@
+[submodule "network-track/libbpf"]
+	path = network-track/libbpf
+	url = https://github.com/libbpf/libbpf.git
+[submodule "network-track/bpftool"]
+	path = network-track/bpftool
+	url = https://github.com/libbpf/bpftool
+[submodule "network-track/blazesym"]
+	path = network-track/blazesym
+	url = https://github.com/libbpf/blazesym.git
+[submodule "network-track/vmlinux.h"]
+	path = network-track/vmlinux.h
+	url = https://github.com/libbpf/vmlinux.h.git

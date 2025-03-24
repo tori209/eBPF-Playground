@@ -5,7 +5,3 @@
 
 /.output
 
-/blazesym
-/libbpf
-/bpftool
-/vmlinux.h

@@ -50,7 +50,7 @@ int tc_ingress(struct __sk_buff *ctx)
 		return TCX_NEXT;
 
 	// Extract TCP Header
-	l4 = (struct tcphdr *)((__u8 *)l3 + (l3->ihl * 4));
+	l4 = (void *)l3 + (l3->ihl * 4);
 	if ((void *)(l4 + 1) > data_end)
 		return TCX_NEXT;
 
@@ -63,35 +63,16 @@ int tc_ingress(struct __sk_buff *ctx)
 	// init memory
 	__builtin_memset(event, 0, sizeof(struct http_event));
 
-	l7 = (char *)l4 + (l4->doff * 4);
+	l7 = (void *)l4 + (l4->doff * 4);
 
 	event->timestamp_ns = bpf_ktime_get_ns();
 	event->src_ip = l3->saddr;
 	event->dst_ip = l3->daddr;
 	event->pid = 0; // bpf_get_current_pid_tgid() >> 32;
+	
+	event->dport = bpf_ntohs(l4->dest);
+	event->sport = bpf_ntohs(l4->source);
 
-	bpf_ringbuf_submit(event, 0);
-	return TCX_NEXT; 
-
-	__u16 i = 0;
-	__u16 j = 0;
-	while (i < MAX_HTTP_METHOD_LENGTH - 1 && l7 + i < data_end && l7[i] != ' ') {
-		event->method[i] = l7[i];
-		i++;
-	}
-	event->method[i] = '\0';
-	i++;
-
-	while (j < MAX_HTTP_PATH_LENGTH - 1 && l7 + i < data_end && l7[i] != ' ' && l7[i] != '\0') {
-		event->path[j++] = l7[i++];
-	}
-	event->path[j] = '\0';
-
-//	i++;
-//	if (l7 + i + 3 >= data_end || l7[i] != 'H' || l7[i+1] != 'T' || l7[i+2] != 'T' || l7[i+3] != 'P')
-//		bpf_ringbuf_discard(event, 0);
-//	else // Submit data to Ringbuf
-//		bpf_ringbuf_submit(event, 0);
 	bpf_ringbuf_submit(event, 0);
 	return TCX_NEXT;
 }

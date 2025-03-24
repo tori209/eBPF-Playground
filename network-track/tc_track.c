@@ -49,12 +49,12 @@ static int log_handler(void *ctx, void *data, size_t size) {
 	ip_addr_parser(src_ip, event->src_ip);
 	ip_addr_parser(dst_ip, event->dst_ip);
 
-	printf("time: %llu src_ip=%u.%u.%u.%u, dst_ip=%u.%u.%u.%u, method: %s, path: %s\n", 
+	printf("time: %llu src_ip=%u.%u.%u.%u, dst_ip=%u.%u.%u.%u, dport=%u, sport=%u\n",
 		event->timestamp_ns,
 		src_ip[0], src_ip[1], src_ip[2], src_ip[3],
 		dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3],
-		event->method,
-		event->path
+		event->dport,
+		event->sport
 		);
  	return 0;
 }
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 	DECLARE_LIBBPF_OPTS(bpf_tcx_opts, tcx_opts,
 		.flags = BPF_F_BEFORE,
 		.relative_fd = 0,
-		.relative_id = 1725,     // bpftool 기준 prog_id를 의미.
+		.relative_id = 2935,     // bpftool 기준 prog_id를 의미.
 		.expected_revision = 0
 	);
 
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 
 	printf("Successfully started.\n");
 
-	list_tc_bpf_programs_on_iface(argv[1]);
+	//list_tc_bpf_programs_on_iface(argv[1]);
 
 	// Working Area 
 	// Stop when Ctrl+C occured
