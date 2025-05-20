@@ -24,7 +24,10 @@ struct {
 SEC("tcx/ingress")
 int tc_ingress(struct __sk_buff *ctx)
 {
-
+	/*
+	if (bpf_skb_pull_data(ctx, ctx->len) < 0)
+		return TCX_NEXT;
+	*/
 	void *data_end = (void *)(__u64)ctx->data_end;
 	void *data = (void *)(__u64)ctx->data;
 	struct ethhdr *l2;
@@ -63,16 +66,27 @@ int tc_ingress(struct __sk_buff *ctx)
 	// init memory
 	__builtin_memset(event, 0, sizeof(struct http_event));
 
-	l7 = (void *)l4 + (l4->doff * 4);
 
 	event->timestamp_ns = bpf_ktime_get_ns();
 	event->src_ip = l3->saddr;
 	event->dst_ip = l3->daddr;
-	event->pid = 0; // bpf_get_current_pid_tgid() >> 32;
+	event->data[0] = '\0'; // bpf_get_current_pid_tgid() >> 32;
+
+	l7 = (char *)l4 + (l4->doff * 4);
 	
-	event->dport = bpf_ntohs(l4->dest);
+	event->dport = ((void*)ctx->data_end - (void*)l7); // bpf_ntohs(l4->dest);
 	event->sport = bpf_ntohs(l4->source);
 
+
+	if ((void *)l7 + 3 >= ctx->data_end)
+		goto submit;
+
+	int i;
+	for (i = 0; i < 3; i++)
+		event->data[i] = l7[i];
+	l7[i] = '\0';
+
+submit:
 	bpf_ringbuf_submit(event, 0);
 	return TCX_NEXT;
 }

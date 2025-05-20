@@ -11,7 +11,7 @@ typedef struct http_event {
 	__u32 dst_ip;
 	__u16 dport;
 	__u16 sport;
-	__u32 pid;
+	char data[4];
 } ip_event_t;
 
 #endif /* __TC_TRACK_H_ */

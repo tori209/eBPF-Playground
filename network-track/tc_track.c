@@ -49,12 +49,13 @@ static int log_handler(void *ctx, void *data, size_t size) {
 	ip_addr_parser(src_ip, event->src_ip);
 	ip_addr_parser(dst_ip, event->dst_ip);
 
-	printf("time: %llu src_ip=%u.%u.%u.%u, dst_ip=%u.%u.%u.%u, dport=%u, sport=%u\n",
+	printf("time: %llu src_ip=%u.%u.%u.%u, dst_ip=%u.%u.%u.%u, dport=%u, sport=%u, data=%s\n",
 		event->timestamp_ns,
 		src_ip[0], src_ip[1], src_ip[2], src_ip[3],
 		dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3],
 		event->dport,
-		event->sport
+		event->sport,
+		event->data
 		);
  	return 0;
 }
@@ -163,7 +164,7 @@ int main(int argc, char **argv)
 
 	// Attach Program ------------------------------------------------------------------
 
-	link = bpf_program__attach_tcx(skel->progs.tc_ingress, net_ifindex, &tcx_opts);
+	link = bpf_program__attach_tcx(skel->progs.tc_ingress, net_ifindex, NULL); //&tcx_opts);
 	if (!link) {
 		perror("bpf_program__attach_tcx");
 		goto cleanup;
